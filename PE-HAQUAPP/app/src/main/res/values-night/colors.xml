@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="company">#00D1A2</color>
+    <color name="input">#FFFFFF</color>
+    <color name="background">#0F0F0F</color>
+    <color name="error">#FF0000</color>
+    <color name="search">#00FFC6</color>
+    <color name="text">#FFFFFF</color>
+    <color name="errorText">#FF9999</color>
+</resources>

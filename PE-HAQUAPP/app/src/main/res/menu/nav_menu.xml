@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <group
+        android:checkableBehavior="single">
+        <item android:id="@+id/nav_home"
+            android:title="@string/main_page"/>
+        <item android:id="@+id/nav_befejezett"
+            android:title="@string/finished_own_works"/>
+        <item android:id="@+id/nav_all_folyamatban"
+            android:title="@string/continous_all_work"/>
+        <item android:id="@+id/nav_all_finished"
+            android:title="@string/all_finished_work"/>
+    </group>
+
+    <item android:title="">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:title="@string/logout"/>
+        </menu>
+    </item>
+</menu>

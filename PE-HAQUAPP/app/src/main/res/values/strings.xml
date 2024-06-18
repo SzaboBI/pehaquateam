@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">PE-HAQUAPP</string>
+    <string name="the_logo_of_the_company">The logo of the company</string>
+    <string name="email_address">E-mail cim</string>
+    <string name="passwd">Jelszo</string>
+    <string name="login">Bejelentkezés</string>
+    <string name="register">Regisztráció</string>
+    <string name="finished_own_works">Befejezett saját munka</string>
+    <string name="main_page">Főoldal</string>
+    <string name="continous_all_work">Összes folyamatban lévő munka</string>
+    <string name="logout">Kijelentkezés</string>
+    <string name="open_nav">Open Navigation Drawer</string>
+    <string name="close_nav">Close Navigation Drawer</string>
+    <string name="all_finished_work">Összes befejezett munka</string>
+    <string name="name">Név, mit csináltatok?</string>
+    <string name="city">Város</string>
+    <string name="street">Utca</string>
+    <string name="houseNum">Házszám</string>
+    <string name="startLabel">Kezdés:</string>
+    <string name="endLabel">Vége:</string>
+    <string name="endDateDescription">Munkavégzés végének dátumát kiválasztó gomb!</string>
+    <string name="backToPrev">Vissza az előző oldalra!</string>
+    <string name="startDateDescription">Munkavégzés kezdetének dátumát kiválasztó gomb!</string>
+    <string name="completed">Teljesítve</string>
+    <string name="save">Mentés</string>
+    <string-array name="joblist">
+        <item>Duguláselhárítás, csatornatisztítás</item>
+        <item>Duguláselhárítás, csatornatisztítás, kamerázás</item>
+        <item>Csőtörés javítás</item>
+        <item>Kereszteződés csere</item>
+        <item>Csapcsere</item>
+        <item>WC tartály csere</item>
+        <item>Fürdőszoba felújítás</item>
+        <item>Szennyvíz szippantás</item>
+        <item>Gépi földmunka</item>
+    </string-array>
+</resources>
