@@ -198,7 +198,9 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     Works works1 = task.getResult().toObject(Works.class);
-                    if (works1 != null && (!works1.isLocked() || (works1.isLocked() && works1.getLockingUser().equals(user.getEmail())))){
+                    if (works1 != null && (!works1.isLocked() ||
+                            (works1.isLocked() && works1.getLockingUser()!=null &&
+                                    works1.getLockingUser().equals(user.getEmail())))){
                         works1.setDocumentID(task.getResult().getId());
                         new LockingTask().doInBackground(works1._getId());
                         Intent intent = new Intent(context, ShowWorkActivity.class);
