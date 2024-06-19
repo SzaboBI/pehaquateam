@@ -72,7 +72,6 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
     private DrawerLayout drawerLayout;
     private TextView TVError;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -202,7 +201,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                             (works1.isLocked() && works1.getLockingUser()!=null &&
                                     works1.getLockingUser().equals(user.getEmail())))){
                         works1.setDocumentID(task.getResult().getId());
-                        new LockingTask().doInBackground(works1._getId());
+                        LockingTask.getInstance(worksItems,user).doInBackground(works1._getId());
                         Intent intent = new Intent(context, ShowWorkActivity.class);
                         Log.i(LOG_TAG,id);
                         intent.putExtra("documentID",id);
@@ -211,13 +210,9 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                         startActivity(intent);
                     }
                     else {
-                        runOnUiThread(()->{
-                            TVError.setText("Munka zárolva! Próbáld újra később!");
-                            TVError.setVisibility(View.VISIBLE);
-                            Log.i(LOG_TAG, String.valueOf(TVError.getVisibility()));
-                        });
-
-
+                        TVError.setText("Munka zárolva! Próbáld újra később!");
+                        TVError.setVisibility(View.VISIBLE);
+                        Log.i(LOG_TAG, String.valueOf(TVError.getVisibility()));
                     }
                 }
             });
@@ -229,22 +224,43 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
         }
 
     }
-    class LockingTask extends AsyncTask<String, Void, Void>{
+
+    /**
+     * This class lock the work (document), it won't be allowed to modify, while the lock is on the document!
+     */
+    static class LockingTask extends AsyncTask<String, Void, Void>{
+
+        private static LockingTask instance;
+        private static CollectionReference reference;
+        private static FirebaseUser user;
+        private LockingTask(CollectionReference collectionReference, FirebaseUser user){
+            reference = collectionReference;
+            LockingTask.user = user;
+        }
+
+        public static LockingTask getInstance(CollectionReference collectionReference, FirebaseUser user) {
+            if (instance == null){
+                instance = new LockingTask(collectionReference, user);
+            }
+            else {
+                setReference(collectionReference);
+                setUser(user);
+            }
+            return instance;
+        }
+
+        public static void setReference(CollectionReference reference) {
+            LockingTask.reference = reference;
+        }
+
+        public static void setUser(FirebaseUser user) {
+            LockingTask.user = user;
+        }
 
         @Override
         protected Void doInBackground(String... id) {
-            worksItems.document(id[0]).update("locked",true);
-            worksItems.document(id[0]).update("lockingUser", user.getEmail());
-            return null;
-        }
-    }
-
-    class ShowErrorTask extends AsyncTask<Void, Void, Void>{
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            Log.i(LOG_TAG, "Eltunt!");
+            reference.document(id[0]).update("locked",true);
+            reference.document(id[0]).update("lockingUser", user.getEmail());
             return null;
         }
     }

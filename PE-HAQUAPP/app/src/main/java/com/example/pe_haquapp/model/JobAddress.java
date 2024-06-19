@@ -25,7 +25,7 @@ public class JobAddress {
         List<Address> addressList = new ArrayList<>();
         try {
             addressList = geocoder.getFromLocationName(city+" "+addressRoad+" "+houseNum,1);
-        }catch (IOException e){
+        }catch (IOException ignored){
 
         }
         String postalCode = addressList.get(0).getPostalCode();

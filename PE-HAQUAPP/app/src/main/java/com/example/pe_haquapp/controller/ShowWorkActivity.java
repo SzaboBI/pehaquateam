@@ -1,7 +1,6 @@
 package com.example.pe_haquapp.controller;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -27,10 +26,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pe_haquapp.R;
-import com.example.pe_haquapp.model.JobAddress;
+import com.example.pe_haquapp.controller.Tasks.UnLockingTask;
+import com.example.pe_haquapp.controller.Tasks.UpdateTask;
 import com.example.pe_haquapp.model.JobDate;
 import com.example.pe_haquapp.model.Works;
-import com.example.pe_haquapp.model.WorksLogs;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -112,7 +111,7 @@ public class ShowWorkActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 activeWork = task.getResult().toObject(Works.class);
                 activeWork.setDocumentID(task.getResult().getId());
-                if (new CheckLocked().doInBackground()){
+                if (CheckLocked.getInstance(worksItems,activeWork,user).doInBackground()){
                     Intent intent = new Intent(context,Joblist_Activity.class);
                     startActivity(intent);
                     finish();
@@ -172,7 +171,7 @@ public class ShowWorkActivity extends AppCompatActivity {
                 intent = new Intent(this, Joblist_Activity.class);
                 break;
         }
-        new UnLockingTask().doInBackground(activeWork._getId());
+        UnLockingTask.getInstance(worksItems).doInBackground(activeWork._getId());
         startActivity(intent);
         finish();
     }
@@ -208,7 +207,9 @@ public class ShowWorkActivity extends AppCompatActivity {
             errorCount++;
         }
         if (errorCount == 0){
-            new UpdateWork().execute(this);
+            new UpdateTask(worksDB, logsItems, worksItems, user, activeWork, current, ETWorkName.getText().toString().trim(),
+                            ETCity.getText().toString().trim(),ETStreet.getText().toString().trim(),
+                            Integer.parseInt(ETHouseNumber.getText().toString().trim())).doInBackground(this);
             Intent openMain = new Intent(this, Joblist_Activity.class);
             startActivity(openMain);
             finish();
@@ -290,125 +291,58 @@ public class ShowWorkActivity extends AppCompatActivity {
             datePicker.show();
         }
     }
-    class UpdateWork extends AsyncTask<Activity, Void, Void>{
-        @Override
-        protected Void doInBackground(Activity... activities) {
-            logsItems = worksDB.collection("logs");
-            if (!ETWorkName.getText().toString().trim().equals(activeWork.getName())){
-                worksItems.document(activeWork._getId()).update("name",ETWorkName.getText().toString().trim()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @RequiresApi(api = Build.VERSION_CODES.O)
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()){
-                            logsItems.add(new WorksLogs(activeWork._getId(), "name",ETWorkName.getText().toString().trim(), user.getEmail()));
-                        }
-                    }
-                });
-            }
-            if (!activeWork.getJobAddress().getCity().equals(ETCity.getText().toString().trim()) ||
-                    !activeWork.getJobAddress().getAddressRoad().equals(ETStreet.getText().toString().trim()) ||
-                    activeWork.getJobAddress().getHouseNum() != Integer.parseInt(ETHouseNumber.getText().toString().trim())){
-                worksItems.document(activeWork._getId()).update("jobAddress",new JobAddress(activities[0], ETCity.getText().toString().trim(),
-                                ETStreet.getText().toString().trim(),
-                                Integer.parseInt(ETHouseNumber.getText().toString().trim())))
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @RequiresApi(api = Build.VERSION_CODES.O)
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()){
-                                    if (!activeWork.getJobAddress().getCity().equals(ETCity.getText().toString().trim())){
-                                        logsItems.add(new WorksLogs(activeWork._getId(), "jobAddress.city",ETWorkName.getText().toString().trim(), user.getEmail()));
-                                    }
-                                    if (!activeWork.getJobAddress().getAddressRoad().equals(ETStreet.getText().toString().trim())){
-                                        logsItems.add(new WorksLogs(activeWork._getId(), "jobAddress.street", ETStreet.getText().toString().trim(), user.getEmail()));
-                                    }
-                                    if (activeWork.getJobAddress().getHouseNum() != Integer.parseInt(ETHouseNumber.getText().toString().trim())){
-                                        logsItems.add(new WorksLogs(activeWork._getId(), "jobAddress.houseNum", ETHouseNumber.getText().toString().trim(), user.getEmail()));
-                                    }
-                                }
-                            }
-                        });
-            }
-            if (activeWork.getJobDate().getStartYear() != current.getStartYear() ||
-                    activeWork.getJobDate().getStartMonth() != current.getStartMonth() ||
-                    activeWork.getJobDate().getStartDayOfMonth() != current.getStartDayOfMonth() ||
-                    activeWork.getJobDate().getStartHour() != current.getStartHour() ||
-                    activeWork.getJobDate().getStartMinute() != current.getStartMinute() ||
-                    activeWork.getJobDate().getEndYear() != current.getEndYear() ||
-                    activeWork.getJobDate().getEndMonth() != current.getEndMonth() ||
-                    activeWork.getJobDate().getEndDayOfMonth() != current.getEndDayOfMonth() ||
-                    activeWork.getJobDate().getEndHour() != current.getEndHour() ||
-                    activeWork.getJobDate().getEndMinute() != current.getEndMinute() ||
-                    activeWork.getJobDate().isFinished() != current.isFinished()){
-                worksItems.document(activeWork._getId()).update("jobDate", current).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @RequiresApi(api = Build.VERSION_CODES.O)
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()){
-                            if (activeWork.getJobDate().getStartYear() != current.getStartYear()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.startYear", String.valueOf(current.getStartYear()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getStartMonth() != current.getStartMonth()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.startMonth", String.valueOf(current.getStartMonth()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getStartDayOfMonth() != current.getStartDayOfMonth()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.startDay", String.valueOf(current.getStartDayOfMonth()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getStartHour() != current.getStartHour()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.startHour", String.valueOf(current.getStartHour()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getStartMinute() != current.getStartMinute()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.startMinute", String.valueOf(current.getStartMinute()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getEndYear() != current.getEndYear()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.endYear", String.valueOf(current.getEndYear()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getEndMonth() != current.getEndMonth()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.endMonth", String.valueOf(current.getEndMonth()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getEndDayOfMonth() != current.getEndDayOfMonth()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.endDay", String.valueOf(current.getEndDayOfMonth()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getEndHour() != current.getEndHour()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.endHour", String.valueOf(current.getEndHour()), user.getEmail()));
-                            }
-                            if (activeWork.getJobDate().getEndMinute() != current.getEndMinute()){
-                                logsItems.add(new WorksLogs(activeWork._getId(),"jobDate.endMinute", String.valueOf(current.getEndMinute()), user.getEmail()));
-                            }
-                        }
-                    }
-                });
-            }
-            new UnLockingTask().doInBackground(activeWork._getId());
-            return null;
-        }
-    }
-    class UnLockingTask extends AsyncTask<String, Void, Void>{
 
-        @Override
-        protected Void doInBackground(String... id) {
-            worksItems.document(id[0]).update("locked",false);
-            worksItems.document(id[0]).update("lockingUser", null);
-            return null;
+    static class CheckLocked extends AsyncTask<Void, Void, Boolean>{
+
+        private static CheckLocked instance;
+        private static CollectionReference collectionReference;
+        private static Works activeItem;
+        private static FirebaseUser firebaseUser;
+        private CheckLocked(CollectionReference reference, Works activeItem, FirebaseUser user){
+            CheckLocked.collectionReference= reference;
+            CheckLocked.activeItem = activeItem;
+            CheckLocked.firebaseUser = user;
         }
-    }
-    class CheckLocked extends AsyncTask<Void, Void, Boolean>{
+
+        public static CheckLocked getInstance(CollectionReference reference, Works activeItem, FirebaseUser user) {
+            if (instance==null){
+                instance = new CheckLocked(reference, activeItem, user);
+            }
+            else {
+                setCollectionReference(reference);
+                setActiveItem(activeItem);
+                setFirebaseUser(user);
+            }
+            return instance;
+        }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
             final boolean[] res = {false};
-            worksItems.document(activeWork._getId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            collectionReference.document(activeItem._getId()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()){
                         Works works1 = task.getResult().toObject(Works.class);
                         if (works1 != null){
-                            res[0] = works1.isLocked() && !works1.getLockingUser().equals(user.getEmail());
+                            res[0] = works1.isLocked() && !works1.getLockingUser().equals(firebaseUser.getEmail());
                         }
                     }
                 }
             });
             return res[0];
+        }
+
+        public static void setCollectionReference(CollectionReference collectionReference) {
+            CheckLocked.collectionReference = collectionReference;
+        }
+
+        public static void setActiveItem(Works activeItem) {
+            CheckLocked.activeItem = activeItem;
+        }
+
+        public static void setFirebaseUser(FirebaseUser firebaseUser) {
+            CheckLocked.firebaseUser = firebaseUser;
         }
     }
 }
