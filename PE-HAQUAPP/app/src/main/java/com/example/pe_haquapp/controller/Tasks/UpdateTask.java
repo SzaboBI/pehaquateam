@@ -23,119 +23,106 @@ public class UpdateTask extends AsyncTask<Activity, Void, Void> {
     private final FirebaseFirestore worksDB;
     private CollectionReference logsItems;
     private final CollectionReference worksItems;
-    private final FirebaseUser user;
+    private final String user;
 
-    private final Works activeItem;
-    private final JobDate modifiedDate;
+    private final Works original;
+    private final Works modified;
 
-    private final String workname;
-    private final String city;
-    private final String street;
-    private final int houseNumber;
-
-    public UpdateTask(FirebaseFirestore worksDB, CollectionReference logsItems, CollectionReference worksItems,
-                      FirebaseUser user, Works activeItem, JobDate modifiedDate, String workname, String city,
-                      String street, int houseNumber){
-        this.worksDB = worksDB;
-        this.logsItems = logsItems;
-        this.worksItems = worksItems;
+    public UpdateTask(Works original, Works modified, String user){
+        this.worksDB = FirebaseFirestore.getInstance();
+        this.worksItems = worksDB.collection("works");
+        this.logsItems = worksDB.collection("logs");
+        this.original = original;
+        this.modified = modified;
         this.user = user;
-        this.activeItem = activeItem;
-        this.modifiedDate = modifiedDate;
-        this.workname = workname;
-        this.city = city;
-        this.street = street;
-        this.houseNumber = houseNumber;
     }
     @Override
     public Void doInBackground(Activity... activities) {
         logsItems = worksDB.collection("logs");
-        if (!workname.equals(activeItem.getName())){
-            worksItems.document(activeItem._getId()).update("name",workname).addOnCompleteListener(new OnCompleteListener<Void>() {
+        if (!modified.getName().equals(original.getName())){
+            worksItems.document(original._getId()).update("name",modified.getName()).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
-                        logsItems.add(new WorksLogs(activeItem._getId(), "name",workname, user.getEmail()));
+                        logsItems.add(new WorksLogs(original._getId(), "name",modified.getName(), user));
                     }
                 }
             });
         }
-        if (!activeItem.getJobAddress().getCity().equals(city) ||
-                !activeItem.getJobAddress().getAddressRoad().equals(street) ||
-                activeItem.getJobAddress().getHouseNum() != houseNumber){
-            worksItems.document(activeItem._getId()).update("jobAddress",new JobAddress(activities[0], city,
-                            street,
-                            houseNumber))
+        if (!modified.getJobAddress().equals(original.getJobAddress())){
+            worksItems.document(original._getId()).update("jobAddress",new JobAddress(activities[0], modified.getJobAddress().getCity(),
+                            modified.getJobAddress().getAddressRoad(),
+                            modified.getJobAddress().getHouseNum()))
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @RequiresApi(api = Build.VERSION_CODES.O)
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()){
-                                if (!activeItem.getJobAddress().getCity().equals(city)){
-                                    logsItems.add(new WorksLogs(activeItem._getId(), "jobAddress.city",city, user.getEmail()));
+                                if (!modified.getJobAddress().getCity().equals(original.getJobAddress().getCity())){
+                                    logsItems.add(new WorksLogs(original._getId(), "jobAddress.city",modified.getJobAddress().getCity(), user));
                                 }
-                                if (!activeItem.getJobAddress().getAddressRoad().equals(street)){
-                                    logsItems.add(new WorksLogs(activeItem._getId(), "jobAddress.street", street, user.getEmail()));
+                                if (!modified.getJobAddress().getAddressRoad().equals(original.getJobAddress().getAddressRoad())){
+                                    logsItems.add(new WorksLogs(original._getId(), "jobAddress.street", modified.getJobAddress().getAddressRoad(), user));
                                 }
-                                if (activeItem.getJobAddress().getHouseNum() != houseNumber){
-                                    logsItems.add(new WorksLogs(activeItem._getId(), "jobAddress.houseNum", String.valueOf(houseNumber), user.getEmail()));
+                                if (modified.getJobAddress().getHouseNum() != original.getJobAddress().getHouseNum()){
+                                    logsItems.add(new WorksLogs(original._getId(), "jobAddress.houseNum", String.valueOf(modified.getJobAddress().getHouseNum()), user));
                                 }
                             }
                         }
                     });
         }
-        if (activeItem.getJobDate().getStartYear() != modifiedDate.getStartYear() ||
-                activeItem.getJobDate().getStartMonth() != modifiedDate.getStartMonth() ||
-                activeItem.getJobDate().getStartDayOfMonth() != modifiedDate.getStartDayOfMonth() ||
-                activeItem.getJobDate().getStartHour() != modifiedDate.getStartHour() ||
-                activeItem.getJobDate().getStartMinute() != modifiedDate.getStartMinute() ||
-                activeItem.getJobDate().getEndYear() != modifiedDate.getEndYear() ||
-                activeItem.getJobDate().getEndMonth() != modifiedDate.getEndMonth() ||
-                activeItem.getJobDate().getEndDayOfMonth() != modifiedDate.getEndDayOfMonth() ||
-                activeItem.getJobDate().getEndHour() != modifiedDate.getEndHour() ||
-                activeItem.getJobDate().getEndMinute() != modifiedDate.getEndMinute() ||
-                activeItem.getJobDate().isFinished() != modifiedDate.isFinished()){
-            worksItems.document(activeItem._getId()).update("jobDate", modifiedDate).addOnCompleteListener(new OnCompleteListener<Void>() {
+        if (original.getJobDate().getStartYear() != modified.getJobDate().getStartYear() ||
+                original.getJobDate().getStartMonth() != modified.getJobDate().getStartMonth() ||
+                original.getJobDate().getStartDayOfMonth() != modified.getJobDate().getStartDayOfMonth() ||
+                original.getJobDate().getStartHour() != modified.getJobDate().getStartHour() ||
+                original.getJobDate().getStartMinute() != modified.getJobDate().getStartMinute() ||
+                original.getJobDate().getEndYear() != modified.getJobDate().getEndYear() ||
+                original.getJobDate().getEndMonth() != modified.getJobDate().getEndMonth() ||
+                original.getJobDate().getEndDayOfMonth() != modified.getJobDate().getEndDayOfMonth() ||
+                original.getJobDate().getEndHour() != modified.getJobDate().getEndHour() ||
+                original.getJobDate().getEndMinute() != modified.getJobDate().getEndMinute() ||
+                original.getJobDate().isFinished() != modified.getJobDate().isFinished()){
+            worksItems.document(original._getId()).update("jobDate", new JobDate(modified.getJobDate())).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
-                        if (activeItem.getJobDate().getStartYear() != modifiedDate.getStartYear()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.startYear", String.valueOf(modifiedDate.getStartYear()), user.getEmail()));
+                        if (original.getJobDate().getStartYear() != modified.getJobDate().getStartYear()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.startYear", String.valueOf(modified.getJobDate().getStartYear()), user));
                         }
-                        if (activeItem.getJobDate().getStartMonth() != modifiedDate.getStartMonth()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.startMonth", String.valueOf(modifiedDate.getStartMonth()), user.getEmail()));
+                        if (original.getJobDate().getStartMonth() != modified.getJobDate().getStartMonth()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.startMonth", String.valueOf(modified.getJobDate().getStartMonth()), user));
                         }
-                        if (activeItem.getJobDate().getStartDayOfMonth() != modifiedDate.getStartDayOfMonth()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.startDay", String.valueOf(modifiedDate.getStartDayOfMonth()), user.getEmail()));
+                        if (original.getJobDate().getStartDayOfMonth() != modified.getJobDate().getStartDayOfMonth()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.startDay", String.valueOf(modified.getJobDate().getStartDayOfMonth()), user));
                         }
-                        if (activeItem.getJobDate().getStartHour() != modifiedDate.getStartHour()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.startHour", String.valueOf(modifiedDate.getStartHour()), user.getEmail()));
+                        if (original.getJobDate().getStartHour() != modified.getJobDate().getStartHour()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.startHour", String.valueOf(modified.getJobDate().getStartHour()), user));
                         }
-                        if (activeItem.getJobDate().getStartMinute() != modifiedDate.getStartMinute()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.startMinute", String.valueOf(modifiedDate.getStartMinute()), user.getEmail()));
+                        if (original.getJobDate().getStartMinute() != modified.getJobDate().getStartMinute()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.startMinute", String.valueOf(modified.getJobDate().getStartMinute()), user));
                         }
-                        if (activeItem.getJobDate().getEndYear() != modifiedDate.getEndYear()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.endYear", String.valueOf(modifiedDate.getEndYear()), user.getEmail()));
+                        if (original.getJobDate().getEndYear() != modified.getJobDate().getEndYear()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.endYear", String.valueOf(modified.getJobDate().getEndYear()), user));
                         }
-                        if (activeItem.getJobDate().getEndMonth() != modifiedDate.getEndMonth()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.endMonth", String.valueOf(modifiedDate.getEndMonth()), user.getEmail()));
+                        if (original.getJobDate().getEndMonth() != modified.getJobDate().getEndMonth()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.endMonth", String.valueOf(modified.getJobDate().getEndMonth()), user));
                         }
-                        if (activeItem.getJobDate().getEndDayOfMonth() != modifiedDate.getEndDayOfMonth()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.endDay", String.valueOf(modifiedDate.getEndDayOfMonth()), user.getEmail()));
+                        if (original.getJobDate().getEndDayOfMonth() != modified.getJobDate().getEndDayOfMonth()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.endDay", String.valueOf(modified.getJobDate().getEndDayOfMonth()), user));
                         }
-                        if (activeItem.getJobDate().getEndHour() != modifiedDate.getEndHour()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.endHour", String.valueOf(modifiedDate.getEndHour()), user.getEmail()));
+                        if (original.getJobDate().getEndHour() != modified.getJobDate().getEndHour()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.endHour", String.valueOf(modified.getJobDate().getEndHour()), user));
                         }
-                        if (activeItem.getJobDate().getEndMinute() != modifiedDate.getEndMinute()){
-                            logsItems.add(new WorksLogs(activeItem._getId(),"jobDate.endMinute", String.valueOf(modifiedDate.getEndMinute()), user.getEmail()));
+                        if (original.getJobDate().getEndMinute() != modified.getJobDate().getEndMinute()){
+                            logsItems.add(new WorksLogs(original._getId(),"jobDate.endMinute", String.valueOf(modified.getJobDate().getEndMinute()), user));
                         }
                     }
                 }
             });
         }
-        UnLockingTask.getInstance(worksItems).doInBackground(activeItem._getId());
+        UnLockingTask.getInstance(worksItems).doInBackground(original._getId());
         return null;
     }
 }

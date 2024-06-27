@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.pe_haquapp.R;
 import com.example.pe_haquapp.controller.Tasks.UnLockingTask;
 import com.example.pe_haquapp.controller.Tasks.UpdateTask;
+import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.JobDate;
 import com.example.pe_haquapp.model.Works;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -120,7 +121,7 @@ public class ShowWorkActivity extends AppCompatActivity {
                 ETCity.setText(activeWork.getJobAddress().getCity());
                 ETStreet.setText(activeWork.getJobAddress().getAddressRoad());
                 ETHouseNumber.setText(String.format("%s",activeWork.getJobAddress().getHouseNum()));
-                current = activeWork.getJobDate();
+                current = new JobDate(activeWork.getJobDate());
                 LocalDateTime localStart = LocalDateTime.of(activeWork.getJobDate().getStartYear(),
                                                             activeWork.getJobDate().getStartMonth(),
                                                             activeWork.getJobDate().getStartDayOfMonth(),
@@ -157,6 +158,8 @@ public class ShowWorkActivity extends AppCompatActivity {
                             current.unfinish();
                             TVEndDate.setText(String.format("%s:", "Vége"));
                         }
+                        Log.i(LOG_TAG, "Original: "+activeWork.getJobDate().toString());
+                        Log.i(LOG_TAG, "Current: "+current.toString());
                     }
                 });
             }
@@ -207,9 +210,12 @@ public class ShowWorkActivity extends AppCompatActivity {
             errorCount++;
         }
         if (errorCount == 0){
-            new UpdateTask(worksDB, logsItems, worksItems, user, activeWork, current, ETWorkName.getText().toString().trim(),
-                            ETCity.getText().toString().trim(),ETStreet.getText().toString().trim(),
-                            Integer.parseInt(ETHouseNumber.getText().toString().trim())).doInBackground(this);
+            new UpdateTask(activeWork,
+                            new Works(ETWorkName.getText().toString().trim(),
+                                        current, new JobAddress(this, ETCity.getText().toString().trim(),
+                                                                ETStreet.getText().toString().trim(),
+                                                                Integer.parseInt(ETHouseNumber.getText().toString().trim())),user.getEmail()),
+                                                                user.getEmail()).doInBackground(this);
             Intent openMain = new Intent(this, Joblist_Activity.class);
             startActivity(openMain);
             finish();

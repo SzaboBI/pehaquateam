@@ -49,4 +49,9 @@ public class JobAddress {
     public int getHouseNum() {
         return houseNum;
     }
+    public boolean equals(JobAddress other){
+        return this.getCity().equals(other.getCity()) &&
+                this.getAddressRoad().equals(other.getAddressRoad()) &&
+                this.getHouseNum() == other.getHouseNum();
+    }
 }

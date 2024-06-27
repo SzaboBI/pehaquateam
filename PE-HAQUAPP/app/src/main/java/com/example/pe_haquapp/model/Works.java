@@ -46,6 +46,14 @@ public class Works {
         this.lockingUser = null;
     }
 
+    public Works(String name, JobDate jobDate, JobAddress jobAddress, String user){
+        this.name = name;
+        this.jobDate = jobDate;
+        this.jobAddress = jobAddress;
+        this.user = user;
+        this.locked = false;
+        this.lockingUser =null;
+    }
     public String _getId(){
         return documentID;
     }

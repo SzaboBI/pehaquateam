@@ -38,12 +38,30 @@ public class JobDate {
         this.startDayOfMonth = startDayOfMonth;
         this.startHour = startHour;
         this.startMinute = startMinute;
-        this.endYear = endYear;
-        this.endMonth = endMonth;
-        this.endDayOfMonth = endDayOfMonth;
-        this.endHour = endHour;
-        this.endMinute = endMinute;
-        this.finished = true;
+        if (endYear != -1){
+            this.endYear = endYear;
+            this.endMonth = endMonth;
+            this.endDayOfMonth = endDayOfMonth;
+            this.endHour = endHour;
+            this.endMinute = endMinute;
+            this.finished = true;
+        }
+        else {
+            this.finished = false;
+        }
+    }
+    public JobDate(JobDate jobDate){
+        this.startYear = jobDate.getStartYear();
+        this.startMonth = jobDate.getStartMonth();
+        this.startDayOfMonth = jobDate.getStartDayOfMonth();
+        this.startHour = jobDate.getStartHour();
+        this.startMinute = jobDate.getStartMinute();
+        this.endYear = jobDate.getEndYear();
+        this.endMonth = jobDate.getEndMonth();
+        this.endDayOfMonth = jobDate.getEndDayOfMonth();
+        this.endHour = jobDate.getEndHour();
+        this.endMinute = jobDate.getEndMinute();
+        this.finished = jobDate.isFinished();
     }
 
     @NonNull
@@ -74,6 +92,7 @@ public class JobDate {
         this.endDayOfMonth = endDayOfMonth;
         this.endHour = endHour;
         this.endMinute = endMinute;
+        this.finished = true;
     }
 
     public void unfinish(){
@@ -82,6 +101,7 @@ public class JobDate {
         this.endDayOfMonth = -1;
         this.endHour = -1;
         this.endMinute = -1;
+        this.finished = false;
     }
 
     public int getStartYear() {
