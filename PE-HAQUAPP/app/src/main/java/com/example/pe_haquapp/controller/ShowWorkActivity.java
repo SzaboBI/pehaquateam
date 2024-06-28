@@ -195,6 +195,9 @@ public class ShowWorkActivity extends AppCompatActivity {
             TVError.setText("Adja meg a munkavégzés közterületének nevét!");
             errorCount++;
         }
+        if (errorCount == 0 && !current.checkCorrect()){
+            errorCount++;
+        }
         try {
             if (errorCount == 0 && ETHouseNumber.getText().toString().trim().isEmpty()) {
                 TVError.setText("Adjon meg egy házszámot!");
@@ -222,16 +225,23 @@ public class ShowWorkActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void openStartDatePicker(View view) {
         //Log.i(LOG_TAG, "DateTimePicker open");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         TimePickerDialog timePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 current.setStartHour(hourOfDay);
                 current.setStartMinute(minute);
-                TVStartDate.setText(String.format("%s: %s-%s-%s %s:%s", "Kezdés: " ,
-                        String.valueOf(current.getStartYear()), String.valueOf(current.getStartMonth()), String.valueOf(current.getStartDayOfMonth()),
-                        String.valueOf(current.getStartHour()), String.valueOf(current.getStartMinute())));
+                TVStartDate.setText(String.format("%s: %s", "Kezdés: " ,
+                        LocalDateTime.of(current.getStartYear(), current.getStartMonth(), current.getStartDayOfMonth(), current.getStartHour(), current.getStartMinute()).format(formatter)));
+                if (!current.checkCorrect()){
+                    TVError.setText("Helytelen dátum!");
+                }
+                else {
+                    TVError.setText("");
+                }
             }
         }, activeWork.getJobDate().getStartHour(), activeWork.getJobDate().getStartMinute(), true);
         DatePickerDialog datePicker = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
@@ -248,16 +258,23 @@ public class ShowWorkActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void openEndDatePicker(View view) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         if (activeWork.getJobDate().getEndYear() != -1){
             TimePickerDialog timePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
                 @Override
                 public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                     current.setStartHour(hourOfDay);
                     current.setStartMinute(minute);
-                    TVEndDate.setText(String.format("%s: %s-%s-%s %s:%s", "Kezdés " ,
-                            String.valueOf(current.getEndYear()), String.valueOf(current.getEndMonth()), String.valueOf(current.getEndDayOfMonth()),
-                            String.valueOf(current.getEndHour()), String.valueOf(current.getEndMinute())));
+
+                    TVEndDate.setText(String.format("%s: %s", "Kezdés " ,
+                            LocalDateTime.of(current.getEndYear(), current.getEndMonth(), current.getEndDayOfMonth(), current.getEndHour(), current.getEndMinute()).format(formatter)));
                     CBCompleted.setChecked(true);
+                    if (!current.checkCorrect()){
+                        TVError.setText("Helytelen dátum!");
+                    }
+                    else {
+                        TVError.setText("");
+                    }
                 }
             }, activeWork.getJobDate().getEndHour(), activeWork.getJobDate().getEndMinute(), true);
             DatePickerDialog datePicker = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
@@ -278,10 +295,15 @@ public class ShowWorkActivity extends AppCompatActivity {
                 public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                     current.setStartHour(hourOfDay);
                     current.setStartMinute(minute);
-                    TVEndDate.setText(String.format("%s: %s-%s-%s %s:%s", "Kezdés " ,
-                            String.valueOf(current.getEndYear()), String.valueOf(current.getEndMonth()), String.valueOf(current.getEndDayOfMonth()),
-                            String.valueOf(current.getEndHour()), String.valueOf(current.getEndMinute())));
+                    TVEndDate.setText(String.format("%s: %s", "Kezdés " ,
+                            LocalDateTime.of(current.getEndYear(), current.getEndMonth(), current.getEndDayOfMonth(), current.getEndHour(), current.getEndMinute()).format(formatter)));
                     CBCompleted.setChecked(true);
+                    if (!current.checkCorrect()){
+                        TVError.setText("Helytelen dátum!");
+                    }
+                    else {
+                        TVError.setText("");
+                    }
                 }
             }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true);
             DatePickerDialog datePicker = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {

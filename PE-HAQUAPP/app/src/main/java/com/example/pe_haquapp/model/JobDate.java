@@ -1,10 +1,13 @@
 package com.example.pe_haquapp.model;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class JobDate {
     private int startYear;
@@ -64,15 +67,18 @@ public class JobDate {
         this.finished = jobDate.isFinished();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @NonNull
     @Override
     public String toString() {
         String output;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd. HH:mm");
         if (endYear == -1 || endMonth == -1 || endDayOfMonth == -1 || endHour == -1 || endMinute == -1){
-           output = startYear+"."+startMonth+"."+startDayOfMonth+". "+startMonth+":"+startMinute;
+           output = LocalDateTime.of(startYear, startMonth, startDayOfMonth, startHour, startMinute).format(formatter);
         }
         else {
-            output = startYear+"."+startMonth+"."+startDayOfMonth+". "+startMonth+":"+startMinute+"-"+endYear+"."+endMonth+"."+endDayOfMonth+".";
+            output = LocalDateTime.of(startYear,startMonth, startDayOfMonth, startHour, startMinute).format(formatter)+" - "+
+                    LocalDateTime.of(endYear,endMonth, endDayOfMonth, endHour, endMinute).format(formatter);
         }
         return  output;
     }
@@ -186,5 +192,19 @@ public class JobDate {
 
     public boolean isFinished() {
         return finished;
+    }
+
+    public boolean checkCorrect(){
+        if (endYear != -1){
+            return (startYear<endMinute ||
+                    (startYear == endYear && startMonth<endMonth) ||
+                    (startYear == endYear && startMonth == endMonth && startDayOfMonth<endDayOfMonth) ||
+                    (startYear == endYear && startMonth == endMonth && startDayOfMonth == endDayOfMonth && startHour<endHour) ||
+                    (startYear == endYear && startMonth == endYear && startDayOfMonth == endDayOfMonth && startHour == endHour && startMinute<endMinute));
+        }
+        else {
+            return true;
+        }
+
     }
 }
