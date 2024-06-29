@@ -20,7 +20,7 @@ public class JobAddress {
     public JobAddress(){
 
     }
-    public JobAddress(Activity baseActivity, String city, String addressRoad, int houseNum){
+    public JobAddress(Activity baseActivity, String city, String addressRoad, int houseNum) throws RuntimeException{
         this.city = city;
         this.addressRoad = addressRoad;
         this.houseNum = houseNum;
@@ -30,8 +30,7 @@ public class JobAddress {
             addressList = geocoder.getFromLocationName(city+" "+addressRoad+" "+houseNum,1);
             Log.i(LOG_TAG, this.city+" "+this.addressRoad+" "+this.houseNum);
         } catch (IOException e) {
-            Log.e(LOG_TAG, e.toString());
-            //throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
         String postalCode = null;
         postalCode = addressList.get(0).getPostalCode();

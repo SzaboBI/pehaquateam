@@ -217,13 +217,21 @@ public class CreateWorkActivity extends AppCompatActivity {
         if (errorCount == 0){
             Intent intent = new Intent(this, Joblist_Activity.class);
             //Log.i(LOG_TAG, ETCity.getText().toString().trim()+" "+ETStreet.getText().toString().trim()+" "+ETHouseNumber.getText().toString().trim());
-            new CreateTask(new Works(ETWorkName.getText().toString().trim(),
-                                    current, new JobAddress(this, ETCity.getText().toString().trim(),
-                                                            ETStreet.getText().toString().trim(),
-                                                            Integer.parseInt(ETHouseNumber.getText().toString().trim())),
-                            user.getEmail()),user).execute();
-            startActivity(intent);
-            finish();
+            try {
+                new CreateTask(new Works(ETWorkName.getText().toString().trim(),
+                        current, new JobAddress(this, ETCity.getText().toString().trim(),
+                        ETStreet.getText().toString().trim(),
+                        Integer.parseInt(ETHouseNumber.getText().toString().trim())),
+                        user.getEmail()),user).execute();
+            }
+            catch (RuntimeException e){
+                TVError.setText("A megadott cím nem található!");
+                errorCount++;
+            }
+            if (errorCount == 0){
+                startActivity(intent);
+                finish();
+            }
         }
     }
 }
