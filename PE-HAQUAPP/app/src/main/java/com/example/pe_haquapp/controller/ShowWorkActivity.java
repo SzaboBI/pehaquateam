@@ -167,13 +167,8 @@ public class ShowWorkActivity extends AppCompatActivity {
     }
 
     public void back(View view) {
-        Intent intent = null;
+        Intent intent = new Intent(this, Joblist_Activity.class);
         String previous = getIntent().getStringExtra("previousActivity");
-        switch (previous){
-            case "Joblist_activity":
-                intent = new Intent(this, Joblist_Activity.class);
-                break;
-        }
         UnLockingTask.getInstance(worksItems).doInBackground(activeWork._getId());
         startActivity(intent);
         finish();

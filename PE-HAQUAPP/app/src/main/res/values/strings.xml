@@ -23,6 +23,7 @@
     <string name="startDateDescription">Munkavégzés kezdetének dátumát kiválasztó gomb!</string>
     <string name="completed">Teljesítve</string>
     <string name="save">Mentés</string>
+    <string name="empty" />
     <string-array name="joblist">
         <item>Duguláselhárítás, csatornatisztítás</item>
         <item>Duguláselhárítás, csatornatisztítás, kamerázás</item>

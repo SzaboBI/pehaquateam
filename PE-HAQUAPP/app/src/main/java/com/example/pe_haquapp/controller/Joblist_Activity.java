@@ -6,22 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.ActionBarContainer;
-import androidx.appcompat.widget.ActionBarOverlayLayout;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
@@ -37,25 +32,17 @@ import com.example.pe_haquapp.controller.Adapters.WorksAdapter;
 import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.Works;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.navigation.NavigationBarItemView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class Joblist_Activity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, WorkClickListener {
     private final String LOG_TAG = Joblist_Activity.class.getName();
@@ -130,10 +117,6 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                 works1.setDocumentID(document.getId());
                 works.add(works1);
                 worksAdapter.notifyDataSetChanged();
-            }
-            if (works.isEmpty()){
-                initializeData();
-                getWorksFromFirestore();
             }
         });
     }
@@ -223,6 +206,12 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             Log.i(LOG_TAG, String.valueOf(TVError.getVisibility()));
         }
 
+    }
+
+    public void openCreateActivity(View view) {
+        Intent intent = new Intent(this, CreateWorkActivity.class);
+        intent.putExtra("key", SECRET_KEY);
+        startActivity(intent);
     }
 
     /**

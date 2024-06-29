@@ -1,19 +1,8 @@
 package com.example.pe_haquapp.model;
 
 import android.os.Build;
-import android.provider.ContactsContract;
 
 import androidx.annotation.RequiresApi;
-
-import com.google.type.DateTime;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-
-import kotlinx.coroutines.Job;
 
 public class Works {
     private String documentID;
@@ -23,6 +12,15 @@ public class Works {
     private String user;
     private boolean locked;
     private String lockingUser;
+
+    /*public Works(Works toCreate){
+        this.name = toCreate.getName();
+        this.jobDate = toCreate.getJobDate();
+        this.jobAddress = toCreate.getJobAddress();
+        this.user = toCreate.getUser();
+        this.locked = false;
+        this.lockingUser = null;
+    }*/
 
     public Works(){
 

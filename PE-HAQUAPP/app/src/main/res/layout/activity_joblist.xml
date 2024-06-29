@@ -63,6 +63,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:src="@drawable/baseline_add_24"
+            android:onClick="openCreateActivity"
             android:backgroundTint="@color/company"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="10dp"/>

@@ -14,6 +14,7 @@ public class WorksLogs {
     private final String loggedDocumentID;
     private final LogDate logDate;
     public enum operation{
+        CREATE,
         UPDATE,
         DELETE,
         UPLOAD

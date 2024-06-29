@@ -134,8 +134,7 @@ public class WorksAdapter extends RecyclerView.Adapter<WorksAdapter.ViewHolder> 
             TVName.setText(currentItem.getName());
             CVWorkItem.setTag(currentItem._getId());
             TVDatum.setText(currentItem.getJobDate().toString());
-            TVCim.setText(currentItem.getJobAddress().getPostcode()+" "
-                    +currentItem.getJobAddress().getCity()
+            TVCim.setText(currentItem.getJobAddress().getCity()
                     +", "+currentItem.getJobAddress().getAddressRoad()
                     +" "+currentItem.getJobAddress().getHouseNum());
         }
