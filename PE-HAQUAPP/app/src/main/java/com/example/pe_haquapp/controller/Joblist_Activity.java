@@ -127,6 +127,18 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                     return false;
                 }
             });
+            SVAddress.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    worksAdapter.getFilter().filter(query.toLowerCase());
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return false;
+                }
+            });
 
             ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
                 Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

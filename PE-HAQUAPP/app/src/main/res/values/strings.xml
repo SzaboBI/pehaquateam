@@ -27,6 +27,7 @@
     <string name="settings">Beállítások</string>
     <string name="createWork">Munka létrehozása</string>
     <string name="filterByDate">Dátum szerinti szűrés</string>
+    <string name="delete">Törlés</string>
     <string-array name="joblist">
         <item>Duguláselhárítás, csatornatisztítás</item>
         <item>Duguláselhárítás, csatornatisztítás, kamerázás</item>

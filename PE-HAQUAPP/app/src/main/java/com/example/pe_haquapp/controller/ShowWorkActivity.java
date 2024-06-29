@@ -31,6 +31,7 @@ import com.example.pe_haquapp.controller.Tasks.UpdateTask;
 import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.JobDate;
 import com.example.pe_haquapp.model.Works;
+import com.example.pe_haquapp.model.WorksLogs;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -313,6 +314,22 @@ public class ShowWorkActivity extends AppCompatActivity {
             }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonth().getValue(), LocalDateTime.now().getDayOfMonth());
             datePicker.show();
         }
+    }
+
+    public void delete(View view) {
+        Intent intent = new Intent(this, ShowWorkActivity.class);
+        worksItems.document(activeWork._getId()).delete().addOnCompleteListener(
+                new OnCompleteListener<Void>() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()){
+                            logsItems.add(new WorksLogs(WorksLogs.operation.DELETE, activeWork._getId(),user.getEmail()));
+                            startActivity(intent);
+                        }
+                    }
+                }
+        );
     }
 
     static class CheckLocked extends AsyncTask<Void, Void, Boolean>{
