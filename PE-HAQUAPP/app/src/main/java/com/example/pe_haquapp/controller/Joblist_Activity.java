@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -58,6 +61,9 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
 
     private DrawerLayout drawerLayout;
     private TextView TVError;
+    private SearchView SVAddress;
+    private ImageButton IBDateFilter;
+    private ImageButton IBSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +72,10 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             super.onCreate(savedInstanceState);
             EdgeToEdge.enable(this);
             setContentView(R.layout.activity_joblist);
+
+            SVAddress = findViewById(R.id.addressSearch);
+            IBDateFilter = findViewById(R.id.filterButton);
+            IBSettings = findViewById(R.id.settingButton);
 
             TVError = findViewById(R.id.error);
             TVError.setVisibility(View.GONE);
@@ -93,6 +103,30 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             toggle.syncState();
 
             getWorksFromFirestore();
+
+            SVAddress.setOnSearchClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!SVAddress.isIconified()){
+                        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) SVAddress.getLayoutParams();
+                        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                        params.setMarginStart(25);
+                        IBSettings.setVisibility(View.INVISIBLE);
+                        IBDateFilter.setVisibility(View.INVISIBLE);
+                    }
+                }
+            });
+            SVAddress.setOnCloseListener(new SearchView.OnCloseListener() {
+                @Override
+                public boolean onClose() {
+                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) SVAddress.getLayoutParams();
+                    params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    params.setMarginEnd(10);
+                    IBSettings.setVisibility(View.VISIBLE);
+                    IBDateFilter.setVisibility(View.VISIBLE);
+                    return false;
+                }
+            });
 
             ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
                 Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

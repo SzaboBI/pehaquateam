@@ -12,6 +12,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -74,6 +76,7 @@ public class CreateWorkActivity extends AppCompatActivity {
             TVEndDate = findViewById(R.id.endDateTextView);
             TVError = findViewById(R.id.error);
             CBFinished = findViewById(R.id.completeCheckBox);
+
 
             EdgeToEdge.enable(this);
             ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
