@@ -6,6 +6,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -206,5 +207,31 @@ public class JobDate {
             return true;
         }
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public boolean equals(LocalDate localDate){
+        if (isFinished()){
+            return ((getStartYear() == localDate.getYear() &&
+                    getStartMonth() == localDate.getMonthValue() &&
+                    getStartDayOfMonth() == localDate.getDayOfMonth()) ||
+                    (getEndYear() == localDate.getYear() &&
+                    getEndMonth() == localDate.getMonthValue() &&
+                    getEndDayOfMonth() == localDate.getDayOfMonth()));
+        }
+        else {
+            return getStartYear() == localDate.getYear() &&
+                    getStartMonth() == localDate.getMonthValue() &&
+                    getStartDayOfMonth() == localDate.getDayOfMonth();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public boolean _isFuture(){
+        return !isFinished() &&
+                (getStartYear() > LocalDate.now().getYear() ||
+                (getStartYear() == LocalDate.now().getYear() && getStartMonth() > LocalDate.now().getMonthValue()) ||
+                (getStartYear() == LocalDate.now().getYear() && getStartMonth() == LocalDate.now().getMonthValue() &&
+                        getStartDayOfMonth() > LocalDate.now().getDayOfMonth()));
     }
 }

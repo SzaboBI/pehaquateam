@@ -244,9 +244,13 @@ public class CreateWorkActivity extends AppCompatActivity {
             Intent intent = new Intent(this, Joblist_Activity.class);
             //Log.i(LOG_TAG, ETCity.getText().toString().trim()+" "+ETStreet.getText().toString().trim()+" "+ETHouseNumber.getText().toString().trim());
             try {
+                String clearedCity = ETCity.getText().toString().replaceAll(" +", " ")
+                        .replaceAll(", ", ",").replaceAll("[|.?!:&*#()/_\\[\\]{}+<>]", "").trim();
+                String clearedStreet = ETStreet.getText().toString().replaceAll(" +", " ")
+                        .replaceAll(", ", ",").replaceAll("[|.?!:&*#()/_\\[\\]{}+<>]", "").trim();
                 new CreateTask(new Works(ETWorkName.getText().toString().trim(),
-                        current, new JobAddress(this, ETCity.getText().toString().trim(),
-                        ETStreet.getText().toString().trim(),
+                        current, new JobAddress(this, clearedCity,
+                        clearedStreet,
                         Integer.parseInt(ETHouseNumber.getText().toString().trim())),
                         user.getEmail()),user).execute();
             }

@@ -49,11 +49,14 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Joblist_Activity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, WorkClickListener {
     private final String LOG_TAG = Joblist_Activity.class.getName();
@@ -75,6 +78,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
     private ImageButton IBDateFilter;
     private ImageButton IBSettings;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -131,6 +135,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                 }
             });
             SVAddress.setOnCloseListener(new SearchView.OnCloseListener() {
+                @SuppressLint("NotifyDataSetChanged")
                 @Override
                 public boolean onClose() {
                     ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) SVAddress.getLayoutParams();
@@ -138,13 +143,59 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                     params.setMarginEnd(10);
                     IBSettings.setVisibility(View.VISIBLE);
                     IBDateFilter.setVisibility(View.VISIBLE);
+                    TVError.setVisibility(View.GONE);
+                    works.clear();
+                    works.addAll(allWorks);
+                    worksAdapter.notifyDataSetChanged();
                     return false;
                 }
             });
             SVAddress.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @SuppressLint("NotifyDataSetChanged")
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-                    worksAdapter.getFilter().filter(query.toLowerCase());
+                    if (query.trim().isEmpty()){
+                        works.addAll(allWorks);
+                        TVError.setVisibility(View.GONE);
+                    }
+                    else {
+                        works.clear();
+                        String cleared = query.replaceAll(" +", " ")
+                                .replaceAll(", ", ",").replaceAll("[|.?!:&*#()/_\\[\\]{}+<>]", "");
+                        Log.i(LOG_TAG, cleared);
+                        Pattern fullAddressPattern = Pattern.compile("^\\d{4} [A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|rakpart|köz) \\d+");
+                        Pattern cityRoadAddressPattern = Pattern.compile("^[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|rakpart|köz) \\d+");
+
+                        Matcher fullAddressMatcher = fullAddressPattern.matcher(cleared.trim());
+                        Matcher cityRoadAddressMatcher = cityRoadAddressPattern.matcher(cleared.trim());
+
+                        String matchedPart = null;
+                        JobAddress.constraintType type = null;
+                        if (fullAddressMatcher.find()){
+                            matchedPart = fullAddressMatcher.group(0);
+                            type = JobAddress.constraintType.FULL_ADDRESS;
+                        }
+                        else if (cityRoadAddressMatcher.find()){
+                            matchedPart = cityRoadAddressMatcher.group(0);
+                            type = JobAddress.constraintType.CITY_ADDRESS;
+                        }
+                        if (matchedPart != null && type != null){
+                            Log.i(LOG_TAG, String.valueOf(type));
+                            for (int i = 0; i < allWorks.size(); i++){
+                                if (allWorks.get(i).getJobAddress().isStringApproipate(matchedPart, type)){
+                                    works.add(allWorks.get(i));
+                                }
+                            }
+                        }
+                    }
+                    if (works.isEmpty()){
+                        TVError.setText("Nincs találat!");
+                        TVError.setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        TVError.setVisibility(View.GONE);
+                    }
+                    worksAdapter.notifyDataSetChanged();
                     return false;
                 }
 
@@ -179,6 +230,12 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                 works.add(works1);
                 worksAdapter.notifyDataSetChanged();
             }
+        }).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                getTodayWorks();
+            }
         });
 
     }
@@ -189,16 +246,17 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
         worksItems.add(new Works("test2",2000, (byte) 1, (byte) 1, (byte) 10, (byte) 0,new JobAddress((Activity) this, "Szeged","Kossuth Lajos sgt.", 99),user.getEmail()));
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         if (menuItem.getItemId() == R.id.nav_home){
-            Log.i(LOG_TAG, "Home");
+            getTodayWorks();
         } else if (menuItem.getItemId() == R.id.nav_befejezett) {
-            Log.i(LOG_TAG, "Befejezett");
-        } else if (menuItem.getItemId() == R.id.nav_all_folyamatban) {
-            Log.i(LOG_TAG, "All folyamatban");
+            getFinishedWorks();
+        } else if (menuItem.getItemId() == R.id.nav_unfinished) {
+            getUnfinishedWorks();
         }
-        else if (menuItem.getItemId() == R.id.nav_all_finished){
+        else if (menuItem.getItemId() == R.id.nav_future){
             Log.i(LOG_TAG, "All finished");
         }
         else {
@@ -218,6 +276,52 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
         else {
             super.onBackPressed();
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void getTodayWorks(){
+        works.clear();
+        for (int i = 0; i < allWorks.size(); i++){
+            if (allWorks.get(i).getJobDate().equals(LocalDate.now())){
+                works.add(allWorks.get(i));
+            }
+        }
+        worksAdapter.notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void getFinishedWorks(){
+        works.clear();
+        for (int i = 0; i< allWorks.size(); i++){
+            if (allWorks.get(i).getJobDate().isFinished()){
+                works.add(allWorks.get(i));
+            }
+        }
+        worksAdapter.notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void getUnfinishedWorks(){
+        works.clear();
+        for (int i = 0; i < allWorks.size(); i++){
+            if (!allWorks.get(i).getJobDate().isFinished()){
+                works.add(allWorks.get(i));
+            }
+        }
+        worksAdapter.notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void getFutureWorks(){
+        works.clear();
+        for (int i = 0; i< allWorks.size(); i++){
+            if (allWorks.get(i).getJobDate()._isFuture()){
+                works.add(allWorks.get(i));
+            }
+        }
+        worksAdapter.notifyDataSetChanged();
     }
 
     public void workSelect(View view) {
@@ -269,11 +373,6 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
         intent.putExtra("key", SECRET_KEY);
         startActivity(intent);
     }
-    @SuppressLint("NotifyDataSetChanged")
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void filterByDate(LocalDate localDate){
-
-    }
 
     @SuppressLint("NotifyDataSetChanged")
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -287,15 +386,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                 public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                     works.clear();
                     for (int i = 0; i < allWorks.size(); i++){
-                        if (allWorks.get(i).getJobDate().getStartYear() == year &&
-                                allWorks.get(i).getJobDate().getStartMonth() == month &&
-                                allWorks.get(i).getJobDate().getStartDayOfMonth() == dayOfMonth){
-                            works.add(allWorks.get(i));
-                        }
-                        else if (allWorks.get(i).getJobDate().isFinished() &&
-                                allWorks.get(i).getJobDate().getEndYear() == year &&
-                                allWorks.get(i).getJobDate().getEndMonth() == month &&
-                                allWorks.get(i).getJobDate().getEndDayOfMonth() == dayOfMonth){
+                        if (allWorks.get(i).getJobDate().equals(LocalDate.of(year,month,dayOfMonth))){
                             works.add(allWorks.get(i));
                         }
                     }

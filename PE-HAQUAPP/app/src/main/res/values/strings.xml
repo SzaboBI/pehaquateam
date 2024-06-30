@@ -5,13 +5,10 @@
     <string name="passwd">Jelszo</string>
     <string name="login">Bejelentkezés</string>
     <string name="register">Regisztráció</string>
-    <string name="finished_own_works">Befejezett saját munka</string>
     <string name="main_page">Főoldal</string>
-    <string name="continous_all_work">Összes folyamatban lévő munka</string>
     <string name="logout">Kijelentkezés</string>
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
-    <string name="all_finished_work">Összes befejezett munka</string>
     <string name="name">Név, mit csináltatok?</string>
     <string name="city">Város</string>
     <string name="street">Utca</string>
@@ -28,6 +25,10 @@
     <string name="createWork">Munka létrehozása</string>
     <string name="filterByDate">Dátum szerinti szűrés</string>
     <string name="delete">Törlés</string>
+    <string name="finished_works">Befejezett munkák</string>
+    <string name="today_works">Mai munkák</string>
+    <string name="future_works">Jövőbeli munkák</string>
+    <string name="unfinished_works">Be nem fejezett munkák</string>
     <string-array name="joblist">
         <item>Duguláselhárítás, csatornatisztítás</item>
         <item>Duguláselhárítás, csatornatisztítás, kamerázás</item>
