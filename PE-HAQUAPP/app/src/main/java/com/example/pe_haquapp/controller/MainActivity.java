@@ -1,6 +1,8 @@
 package com.example.pe_haquapp.controller;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pe_haquapp.R;
+import com.example.pe_haquapp.controller.Utils.NetworkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -59,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
             errorTV.setText("Add meg az e-mail címet!");
         }else if (password.isEmpty()) {
             errorTV.setText("Add meg a jelszót!");
+        }
+        else if (!NetworkUtils.isConnected((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE))){
+            errorTV.setText("Nincs internet!");
         }
         else {
             Pattern pattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", Pattern.CASE_INSENSITIVE);

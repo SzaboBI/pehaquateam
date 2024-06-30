@@ -3,7 +3,9 @@ package com.example.pe_haquapp.controller;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +31,7 @@ import com.example.pe_haquapp.R;
 import com.example.pe_haquapp.controller.Joblist_Activity;
 import com.example.pe_haquapp.controller.Tasks.CreateTask;
 import com.example.pe_haquapp.controller.Tasks.UnLockingTask;
+import com.example.pe_haquapp.controller.Utils.NetworkUtils;
 import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.JobDate;
 import com.example.pe_haquapp.model.Works;
@@ -89,6 +92,21 @@ public class CreateWorkActivity extends AppCompatActivity {
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    if (current == null && isChecked){
+                        current = new JobDate(LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getDayOfMonth(),
+                                            LocalDateTime.now().getHour(), LocalDateTime.now().getMinute());
+                        current.finish();
+                        current.setEndMinute(current.getEndMinute()+1);
+                        TVStartDate.setText(String.format("%s: %s", "Kezdés" ,
+                                LocalDateTime.of(current.getStartYear(), current.getStartMonth(), current.getStartDayOfMonth(), current.getStartHour(), current.getStartMinute()).format(formatter)));
+                        LocalDateTime local = LocalDateTime.of(current.getEndYear(),
+                                current.getEndMonth(),
+                                current.getEndDayOfMonth(),
+                                current.getEndHour(),
+                                current.getEndMinute());
+                        TVEndDate.setText(String.format("%s: %s", "Vége", local.format(formatter)));
+                    }
                     if (isChecked && current.getEndYear() == -1) {
                         current.finish();
                         LocalDateTime local = LocalDateTime.of(current.getEndYear(),
@@ -96,7 +114,6 @@ public class CreateWorkActivity extends AppCompatActivity {
                                 current.getEndDayOfMonth(),
                                 current.getEndHour(),
                                 current.getEndMinute());
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                         TVEndDate.setText(String.format("%s: %s", "Vége", local.format(formatter)));
                     } else if (!isChecked) {
                         current.unfinish();
@@ -169,11 +186,13 @@ public class CreateWorkActivity extends AppCompatActivity {
                 else {
                     TVError.setText("");
                 }
+                CBFinished.setChecked(current.isFinished());
             }
         }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(),true);
         DatePickerDialog datePicker = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                current.finish();
                 current.setEndYear(year);
                 current.setEndMonth(month);
                 current.setEndDayOfMonth(dayOfMonth);
@@ -201,6 +220,10 @@ public class CreateWorkActivity extends AppCompatActivity {
             TVError.setText("Adja meg a munkavégzés dátumát!");
             errorCount++;
         } else if (errorCount == 0 && !current.checkCorrect()) {
+            errorCount++;
+        }
+        if (!NetworkUtils.isConnected((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE))){
+            TVError.setText("Nincs internet!");
             errorCount++;
         }
         try {

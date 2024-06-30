@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.pe_haquapp.R;
 import com.example.pe_haquapp.controller.Tasks.UnLockingTask;
 import com.example.pe_haquapp.controller.Tasks.UpdateTask;
+import com.example.pe_haquapp.controller.Utils.NetworkUtils;
 import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.JobDate;
 import com.example.pe_haquapp.model.Works;
@@ -37,6 +39,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -52,6 +55,7 @@ public class ShowWorkActivity extends AppCompatActivity {
     private FirebaseFirestore worksDB;
     private CollectionReference worksItems;
     private CollectionReference logsItems;
+    private CollectionReference deletedWorksItems;
 
     private EditText ETWorkName;
     private EditText ETCity;
@@ -107,6 +111,8 @@ public class ShowWorkActivity extends AppCompatActivity {
         Context context = this;
         worksItems = worksDB.collection("works");
         logsItems = worksDB.collection("logs");
+        deletedWorksItems = worksDB.collection("deletedWorks");
+
         worksItems.document(id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -194,6 +200,10 @@ public class ShowWorkActivity extends AppCompatActivity {
         if (errorCount == 0 && !current.checkCorrect()){
             errorCount++;
         }
+        if (errorCount == 0 && !NetworkUtils.isConnected((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE))){
+            TVError.setText("Nincs internet!");
+            errorCount++;
+        }
         try {
             if (errorCount == 0 && ETHouseNumber.getText().toString().trim().isEmpty()) {
                 TVError.setText("Adjon meg egy házszámot!");
@@ -259,8 +269,8 @@ public class ShowWorkActivity extends AppCompatActivity {
             TimePickerDialog timePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
                 @Override
                 public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                    current.setStartHour(hourOfDay);
-                    current.setStartMinute(minute);
+                    current.setEndHour(hourOfDay);
+                    current.setEndHour(minute);
 
                     TVEndDate.setText(String.format("%s: %s", "Kezdés " ,
                             LocalDateTime.of(current.getEndYear(), current.getEndMonth(), current.getEndDayOfMonth(), current.getEndHour(), current.getEndMinute()).format(formatter)));
@@ -289,8 +299,8 @@ public class ShowWorkActivity extends AppCompatActivity {
             TimePickerDialog timePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
                 @Override
                 public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                    current.setStartHour(hourOfDay);
-                    current.setStartMinute(minute);
+                    current.setEndHour(hourOfDay);
+                    current.setEndMinute(minute);
                     TVEndDate.setText(String.format("%s: %s", "Kezdés " ,
                             LocalDateTime.of(current.getEndYear(), current.getEndMonth(), current.getEndDayOfMonth(), current.getEndHour(), current.getEndMinute()).format(formatter)));
                     CBCompleted.setChecked(true);
@@ -318,18 +328,24 @@ public class ShowWorkActivity extends AppCompatActivity {
 
     public void delete(View view) {
         Intent intent = new Intent(this, ShowWorkActivity.class);
-        worksItems.document(activeWork._getId()).delete().addOnCompleteListener(
-                new OnCompleteListener<Void>() {
-                    @RequiresApi(api = Build.VERSION_CODES.O)
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()){
-                            logsItems.add(new WorksLogs(WorksLogs.operation.DELETE, activeWork._getId(),user.getEmail()));
-                            startActivity(intent);
+        deletedWorksItems.add(activeWork).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentReference> task) {
+                worksItems.document(activeWork._getId()).delete().addOnCompleteListener(
+                        new OnCompleteListener<Void>() {
+                            @RequiresApi(api = Build.VERSION_CODES.O)
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()){
+                                    logsItems.add(new WorksLogs(WorksLogs.operation.DELETE, activeWork._getId(),user.getEmail()));
+                                    startActivity(intent);
+                                }
+                            }
                         }
-                    }
-                }
-        );
+                );
+            }
+        });
+
     }
 
     static class CheckLocked extends AsyncTask<Void, Void, Boolean>{

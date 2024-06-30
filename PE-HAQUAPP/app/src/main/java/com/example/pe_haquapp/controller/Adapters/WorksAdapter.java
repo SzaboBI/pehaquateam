@@ -1,7 +1,7 @@
 package com.example.pe_haquapp.controller.Adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.pe_haquapp.R;
 import com.example.pe_haquapp.model.Works;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WorksAdapter extends RecyclerView.Adapter<WorksAdapter.ViewHolder> implements Filterable {
     protected static final String LOG_TAG = WorksAdapter.class.getName();
@@ -90,22 +94,57 @@ public class WorksAdapter extends RecyclerView.Adapter<WorksAdapter.ViewHolder> 
                 results.count = allWorks.size();
             }
             else {
+                /*String cleared = constraint.toString().trim().replace(",","").replaceAll(" +"," ");
+                String[] parts = cleared.split(" ");
+                Pattern postcodePattern = Pattern.compile("[0-9]{4}");
+                Pattern roadPattern = Pattern.compile("[A-Za-z]+");
+                String addressRoad="";
+                Matcher postcodeMatcher = postcodePattern.matcher(parts[0]);
+                int houseNum = 0;
+                if (postcodeMatcher.find()){
 
+                }
+                else {
+                    int i = 0;
+                    while (i<parts.length && roadPattern.matcher(parts[i]).find()){
+                        addressRoad = addressRoad+parts[i];
+                        i++;
+                    }
+                    try {
+                        houseNum = Integer.parseInt(parts[i]);
+                    } catch (NumberFormatException ignored){
+
+                    }
+                    if (houseNum!=0 && !addressRoad.isEmpty()){
+                        ArrayList<Works> appropiates= new ArrayList<>();
+                        for (int j = 0; j < allWorks.size(); j++){
+                            if (allWorks.get(i).getJobAddress().getAddressRoad().replace(" ","").equals(addressRoad) &&
+                                allWorks.get(i).getJobAddress().getHouseNum() == houseNum){
+                                appropiates.add(allWorks.get(i));
+                            }
+                        }
+                        results.values = appropiates;
+                        results.count = appropiates.size();
+                    }
+                }*/
             }
 
-            return null;
+            return results;
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
 
         }
     };
 
+
     @Override
     public Filter getFilter() {
-        return null;
+        return worksFilterByStreet;
     }
+
 
 
     static class ViewHolder extends RecyclerView.ViewHolder{

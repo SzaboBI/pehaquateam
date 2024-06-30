@@ -44,6 +44,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/filterButton"
                     android:src="@drawable/filter"
+                    android:onClick="filterByDate"
                     android:backgroundTint="@color/search"
                     app:layout_constraintEnd_toStartOf="@id/settingButton"
                     app:layout_constraintTop_toTopOf="parent"

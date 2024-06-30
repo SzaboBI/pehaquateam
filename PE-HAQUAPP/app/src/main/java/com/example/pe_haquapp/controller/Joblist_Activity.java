@@ -2,22 +2,27 @@ package com.example.pe_haquapp.controller;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -32,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.pe_haquapp.R;
 import com.example.pe_haquapp.controller.Adapters.WorkClickListener;
 import com.example.pe_haquapp.controller.Adapters.WorksAdapter;
+import com.example.pe_haquapp.controller.Utils.NetworkUtils;
 import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.Works;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -45,6 +51,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Joblist_Activity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, WorkClickListener {
@@ -56,6 +64,8 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
     private WorksAdapter worksAdapter;
     private FirebaseFirestore worksDB;
     private CollectionReference worksItems;
+
+    private ArrayList<Works> allWorks;
     private ArrayList<Works> works;
     private FirebaseStorage storage;
 
@@ -75,6 +85,9 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
 
             SVAddress = findViewById(R.id.addressSearch);
             IBDateFilter = findViewById(R.id.filterButton);
+            IBDateFilter.setImageResource(R.drawable.filter);
+            IBDateFilter.setTag("Filter");
+
             IBSettings = findViewById(R.id.settingButton);
 
             TVError = findViewById(R.id.error);
@@ -86,6 +99,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             recyclerView = findViewById(R.id.workRecyclerView);
             recyclerView.setLayoutManager(new GridLayoutManager(this, 1));
 
+            allWorks = new ArrayList<>();
             works = new ArrayList<>();
 
             worksAdapter = new WorksAdapter(this, works, "myActivity",this);
@@ -161,10 +175,12 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             for (QueryDocumentSnapshot document : queryDocumentSnapshot) {
                 Works works1 = document.toObject(Works.class);
                 works1.setDocumentID(document.getId());
+                allWorks.add(works1);
                 works.add(works1);
                 worksAdapter.notifyDataSetChanged();
             }
         });
+
     }
 
     private void initializeData(){
@@ -213,13 +229,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
     @Override
     public void onWorkClicked(String id) {
         TVError.setVisibility(View.GONE);
-        ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkCapabilities capabilities = null;
-        if (manager != null){
-            capabilities = manager.getNetworkCapabilities(manager.getActiveNetwork());
-        }
-        if (manager != null && manager.getActiveNetwork() != null &&
-                capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)){
+        if (NetworkUtils.isConnected((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE))){
             Context context = this;
             worksItems.document(id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @SuppressLint("SetTextI18n")
@@ -258,6 +268,52 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
         Intent intent = new Intent(this, CreateWorkActivity.class);
         intent.putExtra("key", SECRET_KEY);
         startActivity(intent);
+    }
+    @SuppressLint("NotifyDataSetChanged")
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void filterByDate(LocalDate localDate){
+
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void filterByDate(View view) {
+        if (IBDateFilter.getTag() == "Filter"){
+            Log.i(LOG_TAG, "Filter");
+            DatePickerDialog datePicker = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+                @SuppressLint("NotifyDataSetChanged")
+                @RequiresApi(api = Build.VERSION_CODES.O)
+                @Override
+                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                    works.clear();
+                    for (int i = 0; i < allWorks.size(); i++){
+                        if (allWorks.get(i).getJobDate().getStartYear() == year &&
+                                allWorks.get(i).getJobDate().getStartMonth() == month &&
+                                allWorks.get(i).getJobDate().getStartDayOfMonth() == dayOfMonth){
+                            works.add(allWorks.get(i));
+                        }
+                        else if (allWorks.get(i).getJobDate().isFinished() &&
+                                allWorks.get(i).getJobDate().getEndYear() == year &&
+                                allWorks.get(i).getJobDate().getEndMonth() == month &&
+                                allWorks.get(i).getJobDate().getEndDayOfMonth() == dayOfMonth){
+                            works.add(allWorks.get(i));
+                        }
+                    }
+                    worksAdapter.notifyDataSetChanged();
+                    IBDateFilter.setImageResource(R.drawable.baseline_close_24);
+                    IBDateFilter.setTag("Erase");
+                }
+            }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getDayOfMonth());
+            datePicker.show();
+        }
+        else {
+            Log.i(LOG_TAG, "Erase");
+            works.clear();
+            works.addAll(allWorks);
+            worksAdapter.notifyDataSetChanged();
+            IBDateFilter.setImageResource(R.drawable.filter);
+            IBDateFilter.setTag("Filter");
+        }
     }
 
     /**
