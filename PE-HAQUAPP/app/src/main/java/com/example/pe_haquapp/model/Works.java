@@ -4,12 +4,15 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import java.time.LocalDate;
+
 public class Works {
     private String documentID;
     private String name;
     private JobDate jobDate;
     private JobAddress jobAddress;
     private String user;
+    private DeleteDate delete;
     private boolean locked;
     private String lockingUser;
 
@@ -34,6 +37,7 @@ public class Works {
         this.user = user;
         this.locked = false;
         this.lockingUser = null;
+        this.delete = null;
     }
     public Works(String name, int startYear, byte startMonth, byte startDay, byte startHour, byte startMinute, JobAddress jobAddress, String user){
         this.name = name;
@@ -91,4 +95,16 @@ public class Works {
         this.lockingUser = null;
     }
 
+    public DeleteDate getDelete() {
+        return delete;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void _setDelete(LocalDate date){
+        setDelete(new DeleteDate(date));
+    }
+
+    public void setDelete(DeleteDate delete){
+        this.delete = delete;
+    }
 }

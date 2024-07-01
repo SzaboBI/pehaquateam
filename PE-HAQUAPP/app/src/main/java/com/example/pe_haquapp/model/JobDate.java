@@ -234,4 +234,11 @@ public class JobDate {
                 (getStartYear() == LocalDate.now().getYear() && getStartMonth() == LocalDate.now().getMonthValue() &&
                         getStartDayOfMonth() > LocalDate.now().getDayOfMonth()));
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public boolean _isGreaterStart(LocalDate date){
+            return getStartYear() > date.getYear() ||
+                    (getStartYear() == date.getYear() && getStartMonth() > date.getMonthValue()) ||
+                    (getStartYear() == date.getYear() && getStartMonth() == date.getMonthValue() && getStartDayOfMonth() > date.getDayOfMonth());
+    }
 }

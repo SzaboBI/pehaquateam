@@ -37,7 +37,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.pe_haquapp.R;
 import com.example.pe_haquapp.controller.Adapters.WorkClickListener;
 import com.example.pe_haquapp.controller.Adapters.WorksAdapter;
+import com.example.pe_haquapp.controller.Tasks.ArchiveTask;
+import com.example.pe_haquapp.controller.Tasks.DeleteTask;
 import com.example.pe_haquapp.controller.Utils.NetworkUtils;
+import com.example.pe_haquapp.model.DeleteDate;
 import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.Works;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -114,6 +117,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
 
             drawerLayout = findViewById(R.id.drawer_layout);
             NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setBackgroundResource(R.color.background);
             navigationView.setNavigationItemSelectedListener(this);
 
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
@@ -219,6 +223,15 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (NetworkUtils.isConnected((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE))){
+            new ArchiveTask().execute();
+            new DeleteTask().execute();
+        }
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private void getWorksFromFirestore(){
         worksItems = worksDB.collection("works");
@@ -249,6 +262,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        TVError.setVisibility(View.GONE);
         if (menuItem.getItemId() == R.id.nav_home){
             getTodayWorks();
         } else if (menuItem.getItemId() == R.id.nav_befejezett) {
@@ -257,7 +271,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             getUnfinishedWorks();
         }
         else if (menuItem.getItemId() == R.id.nav_future){
-            Log.i(LOG_TAG, "All finished");
+            getFutureWorks();
         }
         else {
             FirebaseAuth.getInstance().signOut();
