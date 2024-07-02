@@ -29,6 +29,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.pe_haquapp.R;
 import com.example.pe_haquapp.controller.Tasks.UnLockingTask;
 import com.example.pe_haquapp.controller.Tasks.UpdateTask;
+import com.example.pe_haquapp.controller.Utils.DateUtils;
 import com.example.pe_haquapp.controller.Utils.NetworkUtils;
 import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.JobDate;
@@ -46,6 +47,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAmount;
 
 public class ShowWorkActivity extends AppCompatActivity {
 
@@ -322,7 +324,7 @@ public class ShowWorkActivity extends AppCompatActivity {
                     current.setEndDayOfMonth(dayOfMonth);
                     timePicker.show();
                 }
-            }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonth().getValue(), LocalDateTime.now().getDayOfMonth());
+            }, LocalDate.now().minusMonths(1).getYear(), LocalDate.now().minusMonths(1).getMonthValue(), LocalDate.now().minusMonths(1).getDayOfMonth());
             datePicker.show();
         }
     }

@@ -27,6 +27,15 @@ public class JobDate {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public JobDate(LocalDateTime start){
+        this.startYear = start.getYear();
+        this.startMonth = start.getMonthValue();
+        this.startDayOfMonth = start.getDayOfMonth();
+        this.startHour = start.getHour();
+        this.startMinute = start.getMinute();
+    }
+
     public JobDate(int startYear, int startMonth, int startDayOfMonth, int startHour, int startMinute){
         this.startYear = startYear;
         this.startMonth = startMonth;
@@ -197,11 +206,11 @@ public class JobDate {
 
     public boolean checkCorrect(){
         if (endYear != -1){
-            return (startYear<endMinute ||
+            return (startYear<endYear ||
                     (startYear == endYear && startMonth<endMonth) ||
                     (startYear == endYear && startMonth == endMonth && startDayOfMonth<endDayOfMonth) ||
                     (startYear == endYear && startMonth == endMonth && startDayOfMonth == endDayOfMonth && startHour<endHour) ||
-                    (startYear == endYear && startMonth == endYear && startDayOfMonth == endDayOfMonth && startHour == endHour && startMinute<endMinute));
+                    (startYear == endYear && startMonth == endMonth && startDayOfMonth == endDayOfMonth && startHour == endHour && startMinute<endMinute));
         }
         else {
             return true;

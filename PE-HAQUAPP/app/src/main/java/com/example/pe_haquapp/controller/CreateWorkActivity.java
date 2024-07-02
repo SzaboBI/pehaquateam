@@ -31,6 +31,7 @@ import com.example.pe_haquapp.R;
 import com.example.pe_haquapp.controller.Joblist_Activity;
 import com.example.pe_haquapp.controller.Tasks.CreateTask;
 import com.example.pe_haquapp.controller.Tasks.UnLockingTask;
+import com.example.pe_haquapp.controller.Utils.DateUtils;
 import com.example.pe_haquapp.controller.Utils.NetworkUtils;
 import com.example.pe_haquapp.model.JobAddress;
 import com.example.pe_haquapp.model.JobDate;
@@ -44,6 +45,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -119,6 +121,12 @@ public class CreateWorkActivity extends AppCompatActivity {
                         current.unfinish();
                         TVEndDate.setText(String.format("%s:", "Vége"));
                     }
+                    if (!current.checkCorrect()){
+                        TVError.setText("Helytelen dátum!");
+                    }
+                    else {
+                        TVError.setText(R.string.empty);
+                    }
                 }
             });
         }
@@ -158,28 +166,31 @@ public class CreateWorkActivity extends AppCompatActivity {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 current.setStartYear(year);
-                current.setStartMonth(month);
+                current.setStartMonth(month+1);
                 current.setStartDayOfMonth(dayOfMonth);
                 timePicker.show();
             }
-        }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getDayOfMonth());
+        }, LocalDate.now().minusMonths(1).getYear(), LocalDate.now().minusMonths(1).getMonthValue(), LocalDate.now().minusMonths(1).getDayOfMonth());
         datePicker.show();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void openEndDatePicker(View view) {
-        if (current == null){
-            current = new JobDate();
-        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        if (current == null){
+            current = new JobDate(LocalDateTime.now().minusMonths(1));
+            TVStartDate.setText(String.format("%s: %s", "Kezdés" ,
+                    LocalDateTime.of(current.getStartYear(), current.getStartMonth(), current.getStartDayOfMonth(), current.getStartHour(), current.getStartMinute()).format(formatter)));
+        }
+
         TimePickerDialog timePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 current.setEndHour(hourOfDay);
-                current.setEndDayOfMonth(minute);
+                current.setEndMinute(minute);
                 TVEndDate.setText(String.format("%s: %s", "Vége" ,
-                        LocalDateTime.of(current.getStartYear(), current.getStartMonth(), current.getStartDayOfMonth(), current.getStartHour(), current.getStartMinute()).format(formatter)));
+                        LocalDateTime.of(current.getEndYear(), current.getEndMonth(), current.getEndDayOfMonth(), current.getEndHour(), current.getEndMinute()).format(formatter)));
                 if (!current.checkCorrect()){
                     TVError.setText("Helytelen dátum!");
                 }
@@ -194,11 +205,11 @@ public class CreateWorkActivity extends AppCompatActivity {
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 current.finish();
                 current.setEndYear(year);
-                current.setEndMonth(month);
+                current.setEndMonth(month+1);
                 current.setEndDayOfMonth(dayOfMonth);
                 timePicker.show();
             }
-        }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getDayOfMonth());
+        }, LocalDate.now().minusMonths(1).getYear(), LocalDate.now().minusMonths(1).getMonthValue(), LocalDate.now().minusMonths(1).getDayOfMonth());
         datePicker.show();
     }
 
@@ -216,7 +227,7 @@ public class CreateWorkActivity extends AppCompatActivity {
             TVError.setText("Adja meg a munkavégzés közterületének nevét!");
             errorCount++;
         }
-        if (errorCount == 0 && current == null){
+        if (errorCount == 0 && (current == null )){
             TVError.setText("Adja meg a munkavégzés dátumát!");
             errorCount++;
         } else if (errorCount == 0 && !current.checkCorrect()) {

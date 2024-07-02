@@ -26,7 +26,23 @@ public class JobAddress {
 
     public JobAddress(Activity baseActivity, String city, String addressRoad, int houseNum) throws RuntimeException {
         this.city = city;
-        this.addressRoad = addressRoad;
+        String[] roadParts = addressRoad.split(" ");
+        String rightRoad = "";
+        switch (roadParts[roadParts.length-1]){
+            case "sugárút": case "sgt":
+                roadParts[roadParts.length - 1] = "sgt.";
+                break;
+            case "körút": case "krt":
+                roadParts[roadParts.length - 1] = "krt.";
+                break;
+            case "u":
+                roadParts[roadParts.length - 1] = "utca";
+                break;
+        }
+        for (String roadPart : roadParts) {
+            rightRoad = rightRoad + " "+ roadPart.trim();
+        }
+        this.addressRoad =rightRoad;
         this.houseNum = houseNum;
         Geocoder geocoder = new Geocoder(baseActivity);
         List<Address> addressList = new ArrayList<>();
@@ -75,6 +91,9 @@ public class JobAddress {
         String cleared = matchedPart.replace(","," ");
         Log.i(LOG_TAG, "Cleared:" + type);
         String[] parts = cleared.split(" ");
+        for (int i = 0; i < parts.length; i++){
+            Log.i(LOG_TAG, parts[i]);
+        }
         switch (type){
             case FULL_ADDRESS:
                 if (Integer.parseInt(parts[0]) == getPostcode()) {
@@ -95,12 +114,12 @@ public class JobAddress {
                         for (int i=0; i< parts.length; i++){
                             Log.i(LOG_TAG, parts[i]);
                         }
-                        String[] roadParts = getAddressRoad().split(" ");
+                        String[] roadParts = getAddressRoad().trim().split(" ");
                         if (roadParts.length == parts.length - 3) {
                             int i = 0;
                             while (i < roadParts.length && roadParts[i].toLowerCase().equals(parts[i + 2].toLowerCase().trim())) {
-                                i++;
 
+                                i++;
                             }
                             return i == roadParts.length;
                         }
@@ -122,13 +141,21 @@ public class JobAddress {
                                 parts[parts.length - 2] = "utca";
                                 break;
                         }
+                        Log.i(LOG_TAG, "StreetType: "+parts[parts.length-2]);
                         for (int i=0; i< parts.length; i++){
                             Log.i(LOG_TAG, parts[i]);
                         }
-                        String[] roadParts = getAddressRoad().split(" ");
+
+                        String[] roadParts = getAddressRoad().trim().split(" ");
+                        Log.i(LOG_TAG, String.valueOf(roadParts.length)+"|"+String.valueOf(parts.length));
+                        for (int i = 0; i < roadParts.length; i++){
+                            Log.i(LOG_TAG,"RoadPart:"+ roadParts[i]);
+                        }
                         if (roadParts.length == parts.length - 2) {
                             int i = 0;
+                            Log.i(LOG_TAG, roadParts[i]+"|"+parts[i+1]);
                             while (i < roadParts.length && roadParts[i].toLowerCase().trim().equals(parts[i + 1].toLowerCase().trim())) {
+                                Log.i(LOG_TAG, roadParts[i]+"|"+parts[i]);
                                 i++;
                             }
                             return i == roadParts.length;
@@ -148,11 +175,12 @@ public class JobAddress {
                                 parts[parts.length - 2] = "utca";
                                 break;
                         }
-                        Log.i(LOG_TAG, parts[parts.length-2]);
-                        String[] roadParts = getAddressRoad().split(" ");
+                        Log.i(LOG_TAG, "StreetType: "+parts[parts.length-2]);
+                        String[] roadParts = getAddressRoad().trim().split(" ");
                         if (roadParts.length == parts.length - 1) {
                             int i = 0;
                             while (i < roadParts.length && roadParts[i].toLowerCase().trim().equals(parts[i].toLowerCase().trim())) {
+                                Log.i(LOG_TAG, roadParts[i]+"|"+parts[i]);
                                 i++;
                             }
                             return i == roadParts.length;

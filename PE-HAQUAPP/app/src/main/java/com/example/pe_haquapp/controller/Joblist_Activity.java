@@ -118,6 +118,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             drawerLayout = findViewById(R.id.drawer_layout);
             NavigationView navigationView = findViewById(R.id.nav_view);
             navigationView.setBackgroundResource(R.color.background);
+            navigationView.setCheckedItem(R.id.nav_home);
             navigationView.setNavigationItemSelectedListener(this);
 
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
@@ -148,8 +149,9 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                     IBSettings.setVisibility(View.VISIBLE);
                     IBDateFilter.setVisibility(View.VISIBLE);
                     TVError.setVisibility(View.GONE);
+                    navigationView.setCheckedItem(R.id.nav_home);
                     works.clear();
-                    works.addAll(allWorks);
+                    getTodayWorks();
                     worksAdapter.notifyDataSetChanged();
                     return false;
                 }
@@ -167,11 +169,14 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                         String cleared = query.replaceAll(" +", " ")
                                 .replaceAll(", ", ",").replaceAll("[|.?!:&*#()/_\\[\\]{}+<>]", "");
                         Log.i(LOG_TAG, cleared);
-                        Pattern fullAddressPattern = Pattern.compile("^\\d{4} [A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|rakpart|köz) \\d+");
-                        Pattern cityRoadAddressPattern = Pattern.compile("^[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|rakpart|köz) \\d+");
+                        Pattern fullAddressPattern = Pattern.compile("^\\d{4} [A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|tér|rakpart|köz) \\d+");
+                        Pattern cityRoadAddressPattern = Pattern.compile("^[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|tér|rakpart|köz) \\d+");
 
                         Matcher fullAddressMatcher = fullAddressPattern.matcher(cleared.trim());
                         Matcher cityRoadAddressMatcher = cityRoadAddressPattern.matcher(cleared.trim());
+
+//                        Log.i(LOG_TAG, "Full: "+ String.valueOf(fullAddressMatcher.find()));
+//                        Log.i(LOG_TAG, "Full: "+ String.valueOf(cityRoadAddressMatcher.find()));
 
                         String matchedPart = null;
                         JobAddress.constraintType type = null;
@@ -183,6 +188,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                             matchedPart = cityRoadAddressMatcher.group(0);
                             type = JobAddress.constraintType.CITY_ADDRESS;
                         }
+                        Log.i(LOG_TAG, matchedPart);
                         if (matchedPart != null && type != null){
                             Log.i(LOG_TAG, String.valueOf(type));
                             for (int i = 0; i < allWorks.size(); i++){
@@ -400,7 +406,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                 public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                     works.clear();
                     for (int i = 0; i < allWorks.size(); i++){
-                        if (allWorks.get(i).getJobDate().equals(LocalDate.of(year,month,dayOfMonth))){
+                        if (allWorks.get(i).getJobDate().equals(LocalDate.of(year,month,dayOfMonth).plusMonths(1))){
                             works.add(allWorks.get(i));
                         }
                     }
@@ -408,7 +414,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                     IBDateFilter.setImageResource(R.drawable.baseline_close_24);
                     IBDateFilter.setTag("Erase");
                 }
-            }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getDayOfMonth());
+            }, LocalDateTime.now().minusMonths(1).getYear(), LocalDateTime.now().minusMonths(1).getMonthValue(), LocalDateTime.now().minusMonths(1).getDayOfMonth());
             datePicker.show();
         }
         else {
