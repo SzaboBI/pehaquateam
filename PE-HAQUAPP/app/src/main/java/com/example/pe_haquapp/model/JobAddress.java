@@ -96,7 +96,7 @@ public class JobAddress {
         }
         switch (type){
             case FULL_ADDRESS:
-                if (Integer.parseInt(parts[0]) == getPostcode()) {
+                if (Integer.parseInt(parts[0].replace(",","").trim()) == getPostcode()) {
                     Log.i(LOG_TAG, "Irsz: "+parts[0]);
                     if (Integer.parseInt(parts[parts.length - 1]) == getHouseNum()) {
                         Log.i(LOG_TAG, "Housenum: "+ parts[parts.length - 1]);
@@ -127,7 +127,8 @@ public class JobAddress {
                 }
                 break;
             case CITY_ADDRESS:
-                if (parts[0].replace(",", "").trim().equals(getCity().trim())) {
+                String clearedCity = parts[0].replace(",", "").substring(0,1).toUpperCase()+ parts[0].replace(",", "").toLowerCase();
+                if (clearedCity.trim().equals(getCity().trim())) {
                     if (Integer.parseInt(parts[parts.length - 1].trim()) == getHouseNum()) {
                         Log.i(LOG_TAG, parts[parts.length-2]);
                         switch (parts[parts.length - 2]) {
@@ -176,10 +177,19 @@ public class JobAddress {
                                 break;
                         }
                         Log.i(LOG_TAG, "StreetType: "+parts[parts.length-2]);
+
                         String[] roadParts = getAddressRoad().trim().split(" ");
+                        Log.i(LOG_TAG, parts.length+"|"+ roadParts.length);
                         if (roadParts.length == parts.length - 1) {
                             int i = 0;
                             while (i < roadParts.length && roadParts[i].toLowerCase().trim().equals(parts[i].toLowerCase().trim())) {
+                                Log.i(LOG_TAG, roadParts[i]+"|"+parts[i]);
+                                i++;
+                            }
+                            return i == roadParts.length;
+                        } else if (roadParts.length == parts.length - 2) {
+                            int i = 0;
+                            while (i < roadParts.length && roadParts[i].toLowerCase().trim().equals(parts[i+1].toLowerCase().trim())) {
                                 Log.i(LOG_TAG, roadParts[i]+"|"+parts[i]);
                                 i++;
                             }

@@ -77,7 +77,7 @@ public class ShowWorkActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if ((getIntent().getIntExtra("key", 1) == SECRET_KEY) && (user != null)){
+        if ((getIntent().getIntExtra("key", 0) == SECRET_KEY) && (user != null)){
             super.onCreate(savedInstanceState);
             EdgeToEdge.enable(this);
             setContentView(R.layout.activity_show_work);
@@ -106,7 +106,9 @@ public class ShowWorkActivity extends AppCompatActivity {
         }
         else {
             Intent intent = new Intent(this, Joblist_Activity.class);
+            intent.putExtra("key",SECRET_KEY);
             startActivity(intent);
+            finish();
         }
     }
 
@@ -180,6 +182,7 @@ public class ShowWorkActivity extends AppCompatActivity {
         Intent intent = new Intent(this, Joblist_Activity.class);
         String previous = getIntent().getStringExtra("previousActivity");
         UnLockingTask.getInstance(worksItems).doInBackground(activeWork._getId());
+        intent.putExtra("key",SECRET_KEY);
         startActivity(intent);
         finish();
     }
@@ -343,6 +346,7 @@ public class ShowWorkActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()){
                                     logsItems.add(new WorksLogs(WorksLogs.operation.DELETE, activeWork._getId(),user.getEmail()));
+                                    intent.putExtra("key",SECRET_KEY);
                                     startActivity(intent);
                                 }
                             }

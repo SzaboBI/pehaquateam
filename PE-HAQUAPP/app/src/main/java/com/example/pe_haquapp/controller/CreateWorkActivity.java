@@ -52,6 +52,7 @@ import java.time.format.DateTimeFormatter;
 public class CreateWorkActivity extends AppCompatActivity {
 
     private final String LOG_TAG = CreateWorkActivity.class.getName();
+    private final int SECRET_KEY = 1;
     private FirebaseUser user;
 
     private JobDate current;
@@ -68,7 +69,7 @@ public class CreateWorkActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user!=null && getIntent().getIntExtra("key",1)==1){
+        if (user!=null && getIntent().getIntExtra("key",0)== SECRET_KEY){
             super.onCreate(savedInstanceState);
 
             setContentView(R.layout.activity_create_work);
@@ -136,6 +137,7 @@ public class CreateWorkActivity extends AppCompatActivity {
     public void back(View view) {
         Intent intent = new Intent(this, Joblist_Activity.class);
         //String previous = getIntent().getStringExtra("previousActivity");
+        intent.putExtra("key",SECRET_KEY);
         startActivity(intent);
         finish();
     }
@@ -257,6 +259,7 @@ public class CreateWorkActivity extends AppCompatActivity {
             try {
                 String clearedCity = ETCity.getText().toString().replaceAll(" +", " ")
                         .replaceAll(", ", ",").replaceAll("[|.?!:&*#()/_\\[\\]{}+<>]", "").trim();
+                clearedCity = clearedCity.substring(0,1).toUpperCase() + clearedCity.substring(1).toLowerCase();
                 String clearedStreet = ETStreet.getText().toString().replaceAll(" +", " ")
                         .replaceAll(", ", ",").replaceAll("[|.?!:&*#()/_\\[\\]{}+<>]", "").trim();
                 new CreateTask(new Works(ETWorkName.getText().toString().trim(),
@@ -270,6 +273,7 @@ public class CreateWorkActivity extends AppCompatActivity {
                 errorCount++;
             }
             if (errorCount == 0){
+                intent.putExtra("key",SECRET_KEY);
                 startActivity(intent);
                 finish();
             }

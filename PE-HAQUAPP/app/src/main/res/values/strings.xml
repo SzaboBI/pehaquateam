@@ -9,7 +9,7 @@
     <string name="logout">Kijelentkezés</string>
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
-    <string name="name">Név, mit csináltatok?</string>
+    <string name="name">Munka megnevezése</string>
     <string name="city">Város</string>
     <string name="street">Utca</string>
     <string name="houseNum">Házszám</string>

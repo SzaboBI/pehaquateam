@@ -85,7 +85,8 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null){
+        Log.i(LOG_TAG, String.valueOf(user));
+        if (user != null && getIntent().getIntExtra("key",0)== SECRET_KEY){
             super.onCreate(savedInstanceState);
             EdgeToEdge.enable(this);
             setContentView(R.layout.activity_joblist);
@@ -96,6 +97,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             IBDateFilter.setTag("Filter");
 
             IBSettings = findViewById(R.id.settingButton);
+            IBSettings.setVisibility(View.INVISIBLE);
 
             TVError = findViewById(R.id.error);
             TVError.setVisibility(View.GONE);
@@ -169,7 +171,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                         String cleared = query.replaceAll(" +", " ")
                                 .replaceAll(", ", ",").replaceAll("[|.?!:&*#()/_\\[\\]{}+<>]", "");
                         Log.i(LOG_TAG, cleared);
-                        Pattern fullAddressPattern = Pattern.compile("^\\d{4} [A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|tér|rakpart|köz) \\d+");
+                        Pattern fullAddressPattern = Pattern.compile("^\\d{4},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|tér|rakpart|köz) \\d+");
                         Pattern cityRoadAddressPattern = Pattern.compile("^[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ]{2,},? *[A-Za-záéúüűóöőÁÉÚÜŰÓÖŐ \\-]+ (sgt|sugárút|utca|u|krt|körút|fasor|dülő|sor|út|tér|rakpart|köz) \\d+");
 
                         Matcher fullAddressMatcher = fullAddressPattern.matcher(cleared.trim());
@@ -188,7 +190,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
                             matchedPart = cityRoadAddressMatcher.group(0);
                             type = JobAddress.constraintType.CITY_ADDRESS;
                         }
-                        Log.i(LOG_TAG, matchedPart);
+                       //Log.i(LOG_TAG, matchedPart);
                         if (matchedPart != null && type != null){
                             Log.i(LOG_TAG, String.valueOf(type));
                             for (int i = 0; i < allWorks.size(); i++){
@@ -283,6 +285,7 @@ public class Joblist_Activity extends AppCompatActivity implements NavigationVie
             FirebaseAuth.getInstance().signOut();
             Intent openMainActivity = new Intent(this, MainActivity.class);
             startActivity(openMainActivity);
+            finish();
         }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

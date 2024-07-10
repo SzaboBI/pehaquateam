@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 public class MainActivity extends AppCompatActivity {
 
     private final String LOG_TAG = MainActivity.class.getName();
+    private final int SECRET_KEY = 1;
 
     private EditText emailET;
     private EditText passwordET;
@@ -77,7 +78,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()){
+                            intent.putExtra("key", SECRET_KEY);
                             startActivity(intent);
+                            finish();
                         }
                         else {
                             errorTV.setText("Sikertelen bejelentkezés!");
